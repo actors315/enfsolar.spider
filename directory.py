@@ -28,7 +28,7 @@ class Spider:
         self.handler = Handler()
 
     def run(self):
-        directory_list = ['panel', 'component', 'material', 'equipment']
+        directory_list = ['panel', 'component', 'material', 'equipment', 'seller', 'installer', 'application', 'service']
         dir_url_list = [];
         for directory in directory_list:
             temp_list = self.handler.get_directory_list(directory)
