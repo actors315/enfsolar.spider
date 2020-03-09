@@ -24,10 +24,7 @@ class Handler:
         collection = re.findall(self.companyInfo, html)
         with open(self.file, "a+", newline='') as file:
             csv_file = csv.writer(file)
-            for company in collection:
-                csv_file.writerows([
-                    ''.join(company[0])
-                ])
+            csv_file.writerows(collection)
 
 
 class Spider:
