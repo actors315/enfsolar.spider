@@ -42,3 +42,4 @@ class Factory:
     def commit(self):
         self.get_connection().commit()
         self.get_connection().close()
+        self.conn = ''
