@@ -30,8 +30,11 @@ class Handler:
         db_handler = db.Factory()
 
         collection = re.findall(self.companyInfo, html)
+        try_count = 0
         for tempRow in collection:
-            print(tempRow)
+            try_count += 1
+            if 0 == try_count % 10:
+                print(try_count)
             sql = "insert into company_info(company_id, url) VALUES (" + tempRow[0] + ",'" + tempRow[1] + "')"
             db_handler.execute(sql, False)
 
