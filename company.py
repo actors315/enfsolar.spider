@@ -31,6 +31,7 @@ class Handler:
 
         collection = re.findall(self.companyInfo, html)
         for tempRow in collection:
+            print(tempRow)
             sql = "insert into company_info(company_id, url) VALUES (" + tempRow[0] + ",'" + tempRow[1] + "')"
             db_handler.execute(sql, False)
 

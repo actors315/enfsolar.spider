@@ -39,6 +39,11 @@ class Factory:
             self.commit()
         return result
 
+    def fetch_data(self, sql):
+        c = self.get_cursor()
+        c.execute(sql)
+        return c.fetchall()
+
     def commit(self):
         self.get_connection().commit()
         self.get_connection().close()

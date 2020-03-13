@@ -102,21 +102,22 @@ class Handler:
 
     def collect(self):
         db_handler = db.Factory()
-        db_handler.init_table()
-        with open(self.file) as f:
-            reader = csv.reader(f)
-            for tempRow in reader:
-                info = self.get_company_info(tempRow[1].lstrip('/'))
-                print(info)
-                if not info:
-                    break
-                else:
-                    sql = "insert into company_info(company_id, url, name, region, site, tel, email, email_sign, category) VALUES (" + \
-                          tempRow[0] + ",'" + tempRow[1] + "','" + info['name'] + "','" + info['region'] + "','" + \
-                          info['site'] + "','" + info['tel'] + "','" + info['email'] + "','" + info['email_sign'] + \
-                          "','" + info['category'] + "')"
-                    db_handler.execute(sql, False)
-                    time.sleep(random.randint(10, 60) / 120)
+
+        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 500"
+        arr = db_handler.fetch_data(sql)
+        for temp in arr:
+            info = self.get_company_info(temp[2].lstrip('/'))
+            print(info)
+            if not info:
+                break
+
+            sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
+                  "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
+                  "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
+                  "`tel` = '" + info['tel'] + "'" + \
+                  " WHERE id = " + temp[0]
+            db_handler.execute(sql, False)
+            time.sleep(random.randint(10, 60) / 120)
 
         db_handler.commit()
 
