@@ -2,7 +2,6 @@ import re
 from urllib.request import Request, urlopen, HTTPError
 import json
 import os
-import csv
 import time
 import random
 
@@ -38,7 +37,7 @@ class Handler:
         try_count = 0
         for tempRow in collection:
             try_count += 1
-            if 1 == try_count % 10:
+            if 1 == try_count % 50:
                 print(try_count)
                 print(tempRow)
 
