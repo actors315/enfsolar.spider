@@ -1,8 +1,1 @@
-re
-urllib
-csv
 xlsxwriter
-os
-time
-random
-sqlite3
