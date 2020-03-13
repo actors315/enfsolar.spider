@@ -1,5 +1,5 @@
 import re
-from urllib.request import Request, urlopen
+from urllib.request import Request, urlopen, HTTPError
 import json
 import os
 import csv
@@ -18,11 +18,16 @@ class Handler:
         self.file = 'doc/company_list.csv'
 
     def fetch_content(self, uri):
-        url = self.baseURL + uri
-        request = Request(url)
-        response = urlopen(request)
-        html = response.read()
-        return html.decode('utf-8')
+
+        try:
+            url = self.baseURL + uri
+            request = Request(url)
+            response = urlopen(request)
+            html = response.read()
+            return html.decode('utf-8')
+        except HTTPError as e:
+            print(e.msg)
+            return None
 
     def get_directory_list(self, uri):
         html = self.fetch_content(uri)
@@ -33,8 +38,10 @@ class Handler:
         try_count = 0
         for tempRow in collection:
             try_count += 1
-            if 0 == try_count % 10:
+            if 1 == try_count % 10:
                 print(try_count)
+                print(tempRow)
+
             sql = "insert into company_info(company_id, url) VALUES (" + tempRow[0] + ",'" + tempRow[1] + "')"
             db_handler.execute(sql, False)
 

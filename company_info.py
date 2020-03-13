@@ -1,7 +1,7 @@
 import re
 import urllib.request
 from urllib.request import Request, urlopen, HTTPError
-import csv
+from xlsxwriter.workbook import Workbook
 import os
 import time
 import random
@@ -103,16 +103,19 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = ''"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 3000"
         arr = db_handler.fetch_data(sql)
         try_count = 0
         for temp in arr:
-            try_count += 1
-            if 0 == try_count % 10:
-                print(try_count)
-
             info = self.get_company_info(temp[2].lstrip('/'))
+
+            try_count += 1
+            if 1 == try_count % 10:
+                print(try_count)
+                print(info)
+
             if not info:
+                time.sleep(60)
                 break
 
             sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
@@ -125,6 +128,32 @@ class Handler:
 
         db_handler.commit()
 
+    def dump_to_excel(self):
+
+        workbook = Workbook(self.companyInfoFile)
+        worksheet = workbook.add_worksheet()
+        row = col = 0
+        worksheet.write(0, col, 'id')
+        worksheet.write(0, col + 1, u"公司名称")
+        worksheet.write(0, col + 2, u"国家")
+        worksheet.write(0, col + 3, u"公司网站")
+        worksheet.write(0, col + 4, u"公司电话")
+        worksheet.write(0, col + 5, u"邮箱")
+        worksheet.write(0, col + 6, u'类别')
+
+        sql = "SELECT company_id,name,region,site,tel,email,category FROM company_info ORDER BY id ASC "
+        arr = db.Factory().fetch_data(sql)
+        for tempRow in arr:
+            row += 1
+            worksheet.write(row, col, tempRow[0])
+            worksheet.write(row, col + 1, tempRow[1])
+            worksheet.write(row, col + 2, tempRow[2])
+            worksheet.write(row, col + 3, tempRow[3])
+            worksheet.write(row, col + 4, tempRow[4])
+            worksheet.write(row, col + 5, tempRow[5])
+            worksheet.write(row, col + 6, tempRow[6])
+
+        workbook.close()
 
 class Spider:
     def __init__(self):
@@ -135,6 +164,7 @@ class Spider:
             os.remove(self.handler.companyInfoFile)
 
         self.handler.collect()
+        self.handler.dump_to_excel()
 
 
 s = Spider()
