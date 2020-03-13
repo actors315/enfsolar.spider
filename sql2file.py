@@ -6,7 +6,6 @@ from xlsxwriter.workbook import Workbook
 import os
 import time
 import random
-from enfsolar.spider import db
 
 
 class Handler:

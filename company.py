@@ -6,6 +6,8 @@ import csv
 import time
 import random
 
+from enfsolar.spider import db
+
 
 class Handler:
 
@@ -24,10 +26,15 @@ class Handler:
 
     def get_directory_list(self, uri):
         html = self.fetch_content(uri)
+
+        db_handler = db.Factory()
+
         collection = re.findall(self.companyInfo, html)
-        with open(self.file, "a+", newline='') as file:
-            csv_file = csv.writer(file)
-            csv_file.writerows(collection)
+        for tempRow in collection:
+            sql = "insert into company_info(company_id, url) VALUES (" + tempRow[0] + ",'" + tempRow[1] + "')"
+            db_handler.execute(sql, False)
+
+        db_handler.commit()
 
         next_url = re.findall(self.nextUrl, html)
         if next_url:
@@ -41,6 +48,8 @@ class Spider:
         self.handler = Handler()
 
     def run(self):
+        db.Factory().init_table()
+
         collection = json.loads(open('doc/directory.json').read())
         if os.path.exists(self.handler.file):
             os.remove(self.handler.file)
