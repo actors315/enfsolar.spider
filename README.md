@@ -8,3 +8,4 @@
 * json
 * csv
 * xlsxwriter
+* sqllite3

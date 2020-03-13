@@ -23,7 +23,6 @@ class Handler:
         return html.decode('utf-8')
 
     def get_directory_list(self, uri):
-        print(uri)
         html = self.fetch_content(uri)
         collection = re.findall(self.companyInfo, html)
         with open(self.file, "a+", newline='') as file:
