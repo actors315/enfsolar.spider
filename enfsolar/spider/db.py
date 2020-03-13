@@ -4,7 +4,7 @@ import sqlite3
 class Factory:
     def __init__(self):
         self.db_file = 'doc/company.db'
-        self.conn = sqlite3.connect(self.db_file)
+        self.conn = ''
         self.init_table_sql = '''
             CREATE TABLE IF NOT EXISTS `company_info`(
             `id`  INTEGER PRIMARY KEY AUTOINCREMENT ,
@@ -24,8 +24,13 @@ class Factory:
         self.execute(self.init_table_sql)
         print('Table created successfully')
 
+    def get_connection(self):
+        if not self.conn:
+            self.conn = sqlite3.connect(self.db_file)
+        return self.conn
+
     def get_cursor(self):
-        return self.conn.cursor()
+        return self.get_connection().cursor()
 
     def execute(self, sql, auto_commit=True):
         c = self.get_cursor()
@@ -35,5 +40,5 @@ class Factory:
         return result
 
     def commit(self):
-        self.conn.commit()
-        self.conn.close()
+        self.get_connection().commit()
+        self.get_connection().close()

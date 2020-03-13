@@ -107,6 +107,7 @@ class Handler:
             reader = csv.reader(f)
             for tempRow in reader:
                 info = self.get_company_info(tempRow[1].lstrip('/'))
+                print(info)
                 if not info:
                     break
                 else:
