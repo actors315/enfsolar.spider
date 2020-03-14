@@ -34,5 +34,5 @@ script:
 after_success:
   - git add --all ./doc/*
   - git commit -m "[skip travis] auto run by travis-ci"
-  - git push https://actors315:$GITHUB_NET_TOKEN@github.com:actors315/enfsolar.spider.git --all
+  - git push https://actors315:$GITHUB_NET_TOKEN@github.com/actors315/enfsolar.spider.git --all
 
