@@ -10,11 +10,25 @@ branches:
 install:
   - pip install -r requirements.txt
 
+before_script:
+    - sed -i 's/travis 9st/skip travis/g' .travis.log
+    - sed -i 's/travis 8st/travis 9st/g' .travis.log
+    - sed -i 's/travis 7st/travis 8st/g' .travis.log
+    - sed -i 's/travis 6st/travis 7st/g' .travis.log
+    - sed -i 's/travis 5st/travis 6st/g' .travis.log
+    - sed -i 's/travis 4st/travis 5st/g' .travis.log
+    - sed -i 's/travis 3st/travis 4st/g' .travis.log
+    - sed -i 's/travis 2st/travis 3st/g' .travis.log
+    - sed -i 's/travis 1st/travis 2st/g' .travis.log
+    - sed -i 's/skip travis/travis 1st/g' .travis.log
+    - export AUTO_TRAVIS_RUN="$(cat .travis.log)"
+
 script:
   - python company_info.py
 
 after_success:
   - git add --all ./doc/*
-  - git commit -m "[skip travis] auto run by travis-ci"
-  - git push https://actors315:$GITHUB_NET_TOKEN@github.com/A   actors315/enfsolar.spider.git --all
+  - git add .travis.yml
+  - git commit -m "[$AUTO_TRAVIS_RUN] auto run by travis-ci"
+  - git push https://actors315:$GITHUB_NET_TOKEN@github.com/actors315/enfsolar.spider.git --all
 

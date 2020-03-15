@@ -103,16 +103,11 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 1000"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 10"
         arr = db_handler.fetch_data(sql)
         try_count = 0
         for temp in arr:
             info = self.get_company_info(temp[2].lstrip('/'))
-
-            try_count += 1
-            if 1 == try_count % 60:
-                print(try_count)
-                print(info)
 
             if not info:
                 time.sleep(60)
@@ -124,7 +119,9 @@ class Handler:
                   "`tel` = '" + info['tel'] + "'" + \
                   " WHERE id = " + str(temp[0])
             db_handler.execute(sql, False)
-            time.sleep(random.randint(10, 60) / 120)
+            sleep = random.randint(10, 60) / 120
+            print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
+            time.sleep(sleep)
 
         db_handler.commit()
 
