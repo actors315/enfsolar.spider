@@ -29,10 +29,10 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - python company.py
+  - python company_info.py
 
 after_success:
   - git add --all ./doc/*
   - git commit -m "[skip travis] auto run by travis-ci"
-  - git push https://actors315:$GITHUB_NET_TOKEN@github.com/actors315/enfsolar.spider.git --all
+  - git push https://actors315:$GITHUB_NET_TOKEN@github.com/A   actors315/enfsolar.spider.git --all
 
