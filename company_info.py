@@ -103,9 +103,9 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 10"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 1000"
         arr = db_handler.fetch_data(sql)
-        try_count = 0
+
         for temp in arr:
             info = self.get_company_info(temp[2].lstrip('/'))
 

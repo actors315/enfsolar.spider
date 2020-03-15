@@ -48,7 +48,7 @@ script:
 
 after_success:
   - git add --all ./doc/*
-  - git add .travis.yml
+  - git add .travis.log
   - git commit -m "[$AUTO_TRAVIS_RUN] auto run by travis-ci"
   - git push https://actors315:$GITHUB_NET_TOKEN@github.com/actors315/enfsolar.spider.git --all
 
