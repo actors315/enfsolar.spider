@@ -122,7 +122,7 @@ class Handler:
                   "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
                   "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
                   "`tel` = '" + info['tel'] + "'" + \
-                  " WHERE id = " + temp[0]
+                  " WHERE id = " + str(temp[0])
             db_handler.execute(sql, False)
             time.sleep(random.randint(10, 60) / 120)
 

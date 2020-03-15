@@ -61,7 +61,7 @@ class Handler:
                 time.sleep(60)
                 break
 
-            sql = "UPDATE company_info SET `email` = '" + email + "' WHERE id = " + temp[0]
+            sql = "UPDATE company_info SET `email` = '" + email + "' WHERE id = " + str(temp[0])
             db_handler.execute(sql, False)
             time.sleep(random.randint(60, 120) / 2)
 
