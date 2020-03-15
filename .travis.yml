@@ -7,6 +7,25 @@ branches:
   only:
   - master
 
+# 配置环境
+before_install:
+  # 替换为刚才生成的解密信息
+  - openssl aes-256-cbc -K $encrypted_9b2d7e19d83c_key -iv $encrypted_9b2d7e19d83c_iv -in .travis/id_rsa.enc -out ~/.ssh/id_rsa -d
+  # 改变文件权限
+  - chmod 600 ~/.ssh/id_rsa
+  # 配置 ssh
+  - eval "$(ssh-agent -s)"
+  - ssh-add ~/.ssh/id_rsa
+  - cp .travis/ssh_config ~/.ssh/config
+  # 配置 git 替换为自己的信息
+  - git config --global user.name 'actors315'
+  - git config --global user.email actors315@gmail.com
+  # 用 ssh 方法提交
+  - git remote set-url origin git@github.com:actors315/enfsolar.spider.git
+  # 切换到提交的目的分支
+  - git checkout master
+
+
 install:
   - pip install -r requirements.txt
 
@@ -22,6 +41,7 @@ before_script:
     - sed -i 's/travis 1st/travis 2st/g' .travis.log
     - sed -i 's/skip travis/travis 1st/g' .travis.log
     - export AUTO_TRAVIS_RUN="$(cat .travis.log)"
+    - echo $AUTO_TRAVIS_RUN
 
 script:
   - python company_info.py
