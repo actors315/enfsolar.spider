@@ -1,6 +1,7 @@
 import re
 import urllib.request
-from urllib.request import Request, urlopen, HTTPError
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 from xlsxwriter.workbook import Workbook
 import os
 import time
@@ -32,8 +33,10 @@ class Handler:
         self.companyInfoFile = 'doc/company_list.xlsx'
 
     def fetch_content(self, uri):
+
+        url = self.baseURL + uri
+
         try:
-            url = self.baseURL + uri
             headers = {'User-Agent': self.userAgent[random.randint(0, 3)]}
             request = Request(url, headers=headers)
 
@@ -46,7 +49,8 @@ class Handler:
 
             html = response.read()
             return html.decode('utf-8')
-        except HTTPError as e:
+        except (HTTPError, URLError) as e:
+            print(url)
             print(e.msg)
             return None
 
@@ -106,11 +110,17 @@ class Handler:
         sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 1000"
         arr = db_handler.fetch_data(sql)
 
+        error_count = 0
+
         for temp in arr:
             info = self.get_company_info(temp[2].lstrip('/'))
 
             if not info:
                 time.sleep(60)
+                error_count += 1
+                continue
+
+            if error_count == 10:
                 break
 
             sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
@@ -151,6 +161,7 @@ class Handler:
             worksheet.write(row, col + 6, tempRow[6])
 
         workbook.close()
+
 
 class Spider:
     def __init__(self):
