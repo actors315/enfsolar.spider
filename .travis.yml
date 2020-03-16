@@ -24,6 +24,7 @@ before_install:
   - git remote set-url origin git@github.com:actors315/enfsolar.spider.git
   # 切换到提交的目的分支
   - git checkout master
+  - git pull
 
 
 install:

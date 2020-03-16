@@ -51,7 +51,7 @@ class Handler:
             return html.decode('utf-8')
         except (HTTPError, URLError) as e:
             print(url)
-            print(e.msg)
+            print(e)
             return None
 
     def get_company_info(self, uri):
