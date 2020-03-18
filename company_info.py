@@ -145,6 +145,7 @@ class Handler:
             if not info:
                 time.sleep(60)
                 error_count += 1
+                print(info)
                 continue
 
             if error_count == 10:
