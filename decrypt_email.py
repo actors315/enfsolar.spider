@@ -1,5 +1,6 @@
 import re
-from urllib.request import Request, urlopen, ProxyHandler, build_opener, HTTPError
+from urllib.request import Request, urlopen, ProxyHandler, build_opener
+from urllib.error import HTTPError, URLError
 from xlsxwriter.workbook import Workbook
 import os
 import time
@@ -38,32 +39,27 @@ class Handler:
             html = re.sub('<a href="(.*?)">', '', html)
             html = re.sub('</a>', '', html)
             return html
-        except HTTPError as e:
-            print(e.msg)
-            time.sleep(random.randint(5, 60))
+        except (HTTPError, URLError) as e:
+            print(e)
             return None
 
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' LIMIT 100"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' LIMIT 10"
         arr = db_handler.fetch_data(sql)
-        try_count = 0
+
         for temp in arr:
             email = self.get_email(temp[1], temp[2].lstrip('/'))
 
-            try_count += 1
-            if 1 == try_count % 10:
-                print(try_count)
-                print(email)
+            sleep = random.randint(60, 120) / 2
+            print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
 
             if not email:
-                time.sleep(60)
                 break
 
             sql = "UPDATE company_info SET `email` = '" + email + "' WHERE id = " + str(temp[0])
             db_handler.execute(sql, False)
-            time.sleep(random.randint(60, 120) / 2)
 
         db_handler.commit()
 
@@ -104,6 +100,7 @@ class Spider:
             os.remove(self.handler.companyInfoFile)
 
         self.handler.collect()
+        self.handler.dump_to_excel()
 
 
 s = Spider()

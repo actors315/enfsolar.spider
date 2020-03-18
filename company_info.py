@@ -28,6 +28,13 @@ class Handler:
             'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)',
 
         ]
+
+        self.companyName2 = '<div class="name">[\s]*(.*)[\s]*?</div>'
+        self.tel2 = '<a href=\'tel:(.*?)\'>'
+        self.email2 = '<a onclick="fire_event(\'EmailClickFromCompanyProfile\', [\d]+?)" href="mailto: (.*?)">'
+        self.site2 = '<a onclick="fire_event(\'WebsiteClickFromCompanyProfile\', [\d]+?)" itemprop="url" href="(.*?)" target="_blank" title=".*">'
+        self.region2 = '<div class="word"  style="margin-left: 40px;">[\s]*(.*?)[\s]*<img class="enf-flag" '
+
         self.proxies = ''
         self.file = 'doc/company_list.csv'
         self.companyInfoFile = 'doc/company_list.xlsx'
@@ -73,6 +80,10 @@ class Handler:
         collection = re.findall(self.companyName, html)
         if collection:
             row['name'] = collection[0]
+        else:
+            collection = re.findall(self.companyName2, html)
+            if collection:
+                row['name'] = collection[0]
 
         collection = re.findall(self.category, html)
         if collection:
@@ -85,10 +96,18 @@ class Handler:
         collection = re.findall(self.tel, html)
         if collection:
             row['tel'] = collection[0]
+        else:
+            collection = re.findall(self.tel2, html)
+            if collection:
+                row['tel'] = collection[0]
 
         collection = re.findall(self.email, html)
         if collection:
             row['email'] = collection[0]
+        else:
+            collection = re.findall(self.email2, html)
+            if collection:
+                row['email'] = collection[0]
 
         collection = re.findall(self.email_click, html)
         if collection:
@@ -97,10 +116,18 @@ class Handler:
         collection = re.findall(self.site, html)
         if collection:
             row['site'] = collection[0]
+        else:
+            collection = re.findall(self.site2, html)
+            if collection:
+                row['site'] = collection[0]
 
         collection = re.findall(self.region, html)
         if collection:
             row['region'] = collection[0]
+        else:
+            collection = re.findall(self.region2, html)
+            if collection:
+                row['region'] = collection[0]
 
         return row
 
@@ -172,7 +199,6 @@ class Spider:
             os.remove(self.handler.companyInfoFile)
 
         self.handler.collect()
-        self.handler.dump_to_excel()
 
 
 s = Spider()

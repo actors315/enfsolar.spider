@@ -47,6 +47,7 @@ before_script:
 
 script:
   - python company_info.py
+  - python decrypt_email.py
 
 after_success:
   - git add --all ./doc/*
