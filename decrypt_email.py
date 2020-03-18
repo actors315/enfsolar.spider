@@ -46,12 +46,13 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' LIMIT 10"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 10"
         arr = db_handler.fetch_data(sql)
 
         for temp in arr:
             email = self.get_email(temp[1], temp[2].lstrip('/'))
 
+            print(email)
             sleep = random.randint(60, 120) / 2
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
 
