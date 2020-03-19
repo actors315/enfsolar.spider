@@ -57,6 +57,7 @@ class Handler:
             print(email)
             sleep = random.randint(120, 180)
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
+            time.sleep(sleep)
 
             if not email:
                 break
