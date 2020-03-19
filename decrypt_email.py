@@ -34,7 +34,7 @@ class Handler:
                 opener = build_opener(proxy_handler)
                 response = opener.open(request)
             else:
-                response = urlopen(request)
+                response = urlopen(request, timeout=60)
 
             html = response.read()
             html = html.decode('utf-8')
@@ -48,7 +48,7 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 15"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id ASC LIMIT 15"
         arr = db_handler.fetch_data(sql)
         print(arr)
         for temp in arr:
@@ -97,7 +97,6 @@ class Handler:
             worksheet.write(0, col + 6, u'类别')
 
             for tempRow in arr:
-
                 last_id = tempRow[7]
 
                 row += 1
@@ -119,7 +118,6 @@ class Spider:
         self.handler = Handler()
 
     def run(self):
-
         self.handler.collect()
         self.handler.dump_to_excel()
 
