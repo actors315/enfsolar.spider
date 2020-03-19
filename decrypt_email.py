@@ -24,7 +24,7 @@ class Handler:
     def get_email(self, code, uri):
         try:
             url = self.baseURL + 'company_email/' + code
-            headers = {'User-Agent': self.userAgent[random.randint(0, 3)], 'Referer': self.baseURL + uri}
+            headers = {'User-Agent': self.userAgent[3], 'Referer': self.baseURL + uri}
             print(url)
             print(headers)
             request = Request(url, headers=headers)
@@ -37,7 +37,6 @@ class Handler:
                 response = urlopen(request)
 
             html = response.read()
-            print(html)
             html = html.decode('utf-8')
             html = re.sub('<a href="(.*?)">', '', html)
             html = re.sub('</a>', '', html)
@@ -49,14 +48,14 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 10"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 6"
         arr = db_handler.fetch_data(sql)
         print(arr)
         for temp in arr:
             email = self.get_email(temp[1], temp[2].lstrip('/'))
 
             print(email)
-            sleep = random.randint(60, 120) / 2
+            sleep = random.randint(120, 180)
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
 
             if not email:

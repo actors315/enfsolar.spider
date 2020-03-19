@@ -2,8 +2,6 @@ import re
 import urllib.request
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
-from xlsxwriter.workbook import Workbook
-import os
 import time
 import random
 from enfsolar.spider import db
@@ -152,8 +150,8 @@ class Handler:
                   "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
                   "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
                   "`tel` = '" + info['tel'] + "'" + \
-                  " WHERE id = " + str(temp[0])
-            db_handler.execute(sql, False)
+                  " WHERE id = %d"
+            db_handler.execute(sql % temp[0], False)
             sleep = random.randint(10, 60) / 120
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
             time.sleep(sleep)
@@ -166,7 +164,6 @@ class Spider:
         self.handler = Handler()
 
     def run(self):
-
         self.handler.collect()
 
 
