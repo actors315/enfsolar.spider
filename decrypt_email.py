@@ -48,7 +48,7 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 6"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 15"
         arr = db_handler.fetch_data(sql)
         print(arr)
         for temp in arr:
