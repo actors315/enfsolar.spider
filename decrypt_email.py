@@ -19,12 +19,14 @@ class Handler:
             'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)',
         ]
         self.proxies = ''
-        self.companyInfoFile = 'doc/company_list.xlsx'
+        self.companyInfoFile = 'doc/company_list%s.xlsx'
 
     def get_email(self, code, uri):
         try:
             url = self.baseURL + 'company_email/' + code
             headers = {'User-Agent': self.userAgent[random.randint(0, 3)], 'Referer': self.baseURL + uri}
+            print(url)
+            print(headers)
             request = Request(url, headers=headers)
 
             if self.proxies:
@@ -35,6 +37,7 @@ class Handler:
                 response = urlopen(request)
 
             html = response.read()
+            print(html)
             html = html.decode('utf-8')
             html = re.sub('<a href="(.*?)">', '', html)
             html = re.sub('</a>', '', html)
@@ -48,7 +51,7 @@ class Handler:
 
         sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id desc LIMIT 10"
         arr = db_handler.fetch_data(sql)
-
+        print(arr)
         for temp in arr:
             email = self.get_email(temp[1], temp[2].lstrip('/'))
 
@@ -66,30 +69,49 @@ class Handler:
 
     def dump_to_excel(self):
 
-        workbook = Workbook(self.companyInfoFile)
-        worksheet = workbook.add_worksheet()
-        row = col = 0
-        worksheet.write(0, col, 'id')
-        worksheet.write(0, col + 1, u"公司名称")
-        worksheet.write(0, col + 2, u"国家")
-        worksheet.write(0, col + 3, u"公司网站")
-        worksheet.write(0, col + 4, u"公司电话")
-        worksheet.write(0, col + 5, u"邮箱")
-        worksheet.write(0, col + 6, u'类别')
+        index = 1
+        last_id = 0
+        while True:
 
-        sql = "SELECT company_id,name,region,site,tel,email,category FROM company_info ORDER BY id ASC "
-        arr = db.Factory().fetch_data(sql)
-        for tempRow in arr:
-            row += 1
-            worksheet.write(row, col, tempRow[0])
-            worksheet.write(row, col + 1, tempRow[1])
-            worksheet.write(row, col + 2, tempRow[2])
-            worksheet.write(row, col + 3, tempRow[3])
-            worksheet.write(row, col + 4, tempRow[4])
-            worksheet.write(row, col + 5, tempRow[5])
-            worksheet.write(row, col + 6, tempRow[6])
+            sql = "SELECT company_id,name,region,site,tel,email,category,id FROM company_info WHERE id > " + \
+                  str(last_id) + " ORDER BY id ASC LIMIT 50000"
+            arr = db.Factory().fetch_data(sql)
 
-        workbook.close()
+            if not arr:
+                break
+
+            file = self.companyInfoFile % index
+
+            if os.path.exists(file):
+                os.remove(file)
+
+            workbook = Workbook(file)
+            worksheet = workbook.add_worksheet()
+            row = col = 0
+            worksheet.write(0, col, 'id')
+            worksheet.write(0, col + 1, u"公司名称")
+            worksheet.write(0, col + 2, u"国家")
+            worksheet.write(0, col + 3, u"公司网站")
+            worksheet.write(0, col + 4, u"公司电话")
+            worksheet.write(0, col + 5, u"邮箱")
+            worksheet.write(0, col + 6, u'类别')
+
+            for tempRow in arr:
+
+                last_id = tempRow[7]
+
+                row += 1
+                worksheet.write(row, col, tempRow[0])
+                worksheet.write(row, col + 1, tempRow[1])
+                worksheet.write(row, col + 2, tempRow[2])
+                worksheet.write(row, col + 3, tempRow[3])
+                worksheet.write(row, col + 4, tempRow[4])
+                worksheet.write(row, col + 5, tempRow[5])
+                worksheet.write(row, col + 6, tempRow[6])
+
+            workbook.close()
+
+            index += 1
 
 
 class Spider:
@@ -97,8 +119,6 @@ class Spider:
         self.handler = Handler()
 
     def run(self):
-        if os.path.exists(self.handler.companyInfoFile):
-            os.remove(self.handler.companyInfoFile)
 
         self.handler.collect()
         self.handler.dump_to_excel()

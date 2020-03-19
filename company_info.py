@@ -14,7 +14,7 @@ class Handler:
     def __init__(self):
         self.baseURL = u"https://www.enfsolar.com/"
         self.companyName = '<h1 class="blue-title" itemprop="name">[\s]*(.*?)[\s]*?</h1>'
-        self.category = '<a\s*class="enf-icon-type enf-icon-type-panel current enf-tooltip" data-container="body" data-content="(.*?)"'
+        self.category = '<a\s*class="enf-icon-type enf-icon-type-(.*?) current enf-tooltip" data-container="body" data-content="(.*?)"'
         self.category2 = '<span itemprop="name">[\s]*<span class="glyphicon glyphicon-home"></span>[\s]*(.*?)[\s]*</span>'
         self.tel = '<td itemprop="telephone">[\s]*?<a.*>(.*)</a>[\s]*?</td>'
         self.email = '<td itemprop="email">[\s]*?<a.*?href="mailto: ([^\s]+?)">'
@@ -26,7 +26,6 @@ class Handler:
             'Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11',
             'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6',
             'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.2; Trident/6.0)',
-
         ]
 
         self.companyName2 = '<div class="name">[\s]*(.*)[\s]*?</div>'
@@ -36,8 +35,6 @@ class Handler:
         self.region2 = '<div class="word"  style="margin-left: 40px;">[\s]*(.*?)[\s]*<img class="enf-flag" '
 
         self.proxies = ''
-        self.file = 'doc/company_list.csv'
-        self.companyInfoFile = 'doc/company_list.xlsx'
 
     def fetch_content(self, uri):
 
@@ -134,7 +131,7 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `name` = '' LIMIT 1000"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' LIMIT 1000"
         arr = db_handler.fetch_data(sql)
 
         error_count = 0
@@ -163,41 +160,12 @@ class Handler:
 
         db_handler.commit()
 
-    def dump_to_excel(self):
-
-        workbook = Workbook(self.companyInfoFile)
-        worksheet = workbook.add_worksheet()
-        row = col = 0
-        worksheet.write(0, col, 'id')
-        worksheet.write(0, col + 1, u"公司名称")
-        worksheet.write(0, col + 2, u"国家")
-        worksheet.write(0, col + 3, u"公司网站")
-        worksheet.write(0, col + 4, u"公司电话")
-        worksheet.write(0, col + 5, u"邮箱")
-        worksheet.write(0, col + 6, u'类别')
-
-        sql = "SELECT company_id,name,region,site,tel,email,category FROM company_info ORDER BY id ASC "
-        arr = db.Factory().fetch_data(sql)
-        for tempRow in arr:
-            row += 1
-            worksheet.write(row, col, tempRow[0])
-            worksheet.write(row, col + 1, tempRow[1])
-            worksheet.write(row, col + 2, tempRow[2])
-            worksheet.write(row, col + 3, tempRow[3])
-            worksheet.write(row, col + 4, tempRow[4])
-            worksheet.write(row, col + 5, tempRow[5])
-            worksheet.write(row, col + 6, tempRow[6])
-
-        workbook.close()
-
 
 class Spider:
     def __init__(self):
         self.handler = Handler()
 
     def run(self):
-        if os.path.exists(self.handler.companyInfoFile):
-            os.remove(self.handler.companyInfoFile)
 
         self.handler.collect()
 
