@@ -48,11 +48,14 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' order by id ASC LIMIT 15"
+        sql = "SELECT id,email_sign,url FROM company_info WHERE `email` = '' AND email_sign <> '' AND try_index = 0 order by id ASC LIMIT 10"
         arr = db_handler.fetch_data(sql)
         print(arr)
         for temp in arr:
             email = self.get_email(temp[1], temp[2].lstrip('/'))
+
+            if "Too many requests" == email:
+                break
 
             print(email)
             sleep = random.randint(120, 180)
@@ -60,12 +63,11 @@ class Handler:
             time.sleep(sleep)
 
             if not email:
-                break
+                sql = "UPDATE company_info SET `try_index` = try_index + 1 WHERE id = " + str(temp[0])
+            else:
+                sql = "UPDATE company_info SET `email` = '" + email + "' WHERE id = " + str(temp[0])
 
-            sql = "UPDATE company_info SET `email` = '" + email + "' WHERE id = " + str(temp[0])
-            db_handler.execute(sql, False)
-
-        db_handler.commit()
+            db_handler.execute(sql)
 
     def dump_to_excel(self):
 
