@@ -1,7 +1,7 @@
 import re
-from urllib.request import Request, urlopen, HTTPError
+from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 import json
-import os
 import time
 import random
 
@@ -37,9 +37,8 @@ class Handler:
         try_count = 0
         for tempRow in collection:
             try_count += 1
-            if 1 == try_count % 50:
-                print(try_count)
-                print(tempRow)
+            print(try_count)
+            print(tempRow)
 
             sql = "insert into company_info(company_id, url) VALUES (" + tempRow[0] + ",'" + tempRow[1] + "')"
             db_handler.execute(sql, False)
@@ -48,7 +47,7 @@ class Handler:
 
         next_url = re.findall(self.nextUrl, html)
         if next_url:
-            time.sleep(random.randint(1, 10) / 10)
+            time.sleep(random.randint(1, 30) / 100)
             next_url = next_url[0]
             self.get_directory_list(next_url.lstrip('/'))
 
@@ -61,8 +60,6 @@ class Spider:
         db.Factory().init_table()
 
         collection = json.loads(open('doc/directory.json').read())
-        if os.path.exists(self.handler.file):
-            os.remove(self.handler.file)
 
         for directory in collection:
             uri = 'directory/' + directory

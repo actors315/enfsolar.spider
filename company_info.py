@@ -2,6 +2,8 @@ import re
 import urllib.request
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
+from xlsxwriter.workbook import Workbook
+import os
 import time
 import random
 from enfsolar.spider import db
@@ -32,7 +34,26 @@ class Handler:
         self.site2 = '<a onclick="fire_event(\'WebsiteClickFromCompanyProfile\', [\d]+?)" itemprop="url" href="(.*?)" target="_blank" title=".*">'
         self.region2 = '<div class="word"  style="margin-left: 40px;">[\s]*(.*?)[\s]*<img class="enf-flag" '
 
-        self.proxies = ''
+        self.companyInfoFile = 'doc/company_list%s.xlsx'
+
+    def get_email(self, code, uri):
+        try:
+            url = self.baseURL + 'company_email/' + code
+            headers = {'User-Agent': self.userAgent[3], 'Referer': self.baseURL + uri}
+            print(url)
+            print(headers)
+            request = Request(url, headers=headers)
+
+            response = urlopen(request, timeout=60)
+
+            html = response.read()
+            html = html.decode('utf-8')
+            html = re.sub('<a href="(.*?)">', '', html)
+            html = re.sub('</a>', '', html)
+            return html
+        except (HTTPError, URLError) as e:
+            print(e)
+            return None
 
     def fetch_content(self, uri):
 
@@ -42,12 +63,7 @@ class Handler:
             headers = {'User-Agent': self.userAgent[random.randint(0, 3)]}
             request = Request(url, headers=headers)
 
-            if self.proxies:
-                proxy_handler = urllib.request.ProxyHandler(self.proxies)
-                opener = urllib.request.build_opener(proxy_handler)
-                response = opener.open(request)
-            else:
-                response = urlopen(request)
+            response = urlopen(request)
 
             html = response.read()
             return html.decode('utf-8')
@@ -96,17 +112,21 @@ class Handler:
             if collection:
                 row['tel'] = collection[0]
 
-        collection = re.findall(self.email, html)
-        if collection:
-            row['email'] = collection[0]
-        else:
-            collection = re.findall(self.email2, html)
-            if collection:
-                row['email'] = collection[0]
-
         collection = re.findall(self.email_click, html)
         if collection:
             row['email_sign'] = collection[0]
+            email = self.get_email(row['email_sign'], uri)
+            if not email:
+                return False
+            row['email'] = email
+        else:
+            collection = re.findall(self.email, html)
+            if collection:
+                row['email'] = collection[0]
+            else:
+                collection = re.findall(self.email2, html)
+                if collection:
+                    row['email'] = collection[0]
 
         collection = re.findall(self.site, html)
         if collection:
@@ -129,34 +149,75 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' LIMIT 1000"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' order try_index ASC,id ASC LIMIT 10"
         arr = db_handler.fetch_data(sql)
-
         error_count = 0
 
         for temp in arr:
             info = self.get_company_info(temp[2].lstrip('/'))
 
-            if not info:
-                time.sleep(60)
-                error_count += 1
-                print(info)
-                continue
-
-            if error_count == 10:
-                break
-
             sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
                   "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
                   "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
-                  "`tel` = '" + info['tel'] + "'" + \
+                  "`tel` = '" + info['tel'] + "',`try_index` = try_index + 1" + \
                   " WHERE id = %d"
-            db_handler.execute(sql % temp[0], False)
+            db_handler.execute(sql % temp[0])
             sleep = random.randint(10, 60) / 120
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
             time.sleep(sleep)
 
-        db_handler.commit()
+            if not info:
+                time.sleep(60)
+                error_count += 1
+                continue
+
+            if error_count == 3:
+                break
+
+    def dump_to_excel(self):
+
+        index = 1
+        last_id = 0
+        while True:
+
+            sql = "SELECT company_id,name,region,site,tel,email,category,id FROM company_info WHERE id > " + \
+                  str(last_id) + " ORDER BY id ASC LIMIT 50000"
+            arr = db.Factory().fetch_data(sql)
+
+            if not arr:
+                break
+
+            file = self.companyInfoFile % index
+
+            if os.path.exists(file):
+                os.remove(file)
+
+            workbook = Workbook(file)
+            worksheet = workbook.add_worksheet()
+            row = col = 0
+            worksheet.write(0, col, 'id')
+            worksheet.write(0, col + 1, u"公司名称")
+            worksheet.write(0, col + 2, u"国家")
+            worksheet.write(0, col + 3, u"公司网站")
+            worksheet.write(0, col + 4, u"公司电话")
+            worksheet.write(0, col + 5, u"邮箱")
+            worksheet.write(0, col + 6, u'类别')
+
+            for tempRow in arr:
+                last_id = tempRow[7]
+
+                row += 1
+                worksheet.write(row, col, tempRow[0])
+                worksheet.write(row, col + 1, tempRow[1])
+                worksheet.write(row, col + 2, tempRow[2])
+                worksheet.write(row, col + 3, tempRow[3])
+                worksheet.write(row, col + 4, tempRow[4])
+                worksheet.write(row, col + 5, tempRow[5])
+                worksheet.write(row, col + 6, tempRow[6])
+
+            workbook.close()
+
+            index += 1
 
 
 class Spider:
@@ -165,6 +226,7 @@ class Spider:
 
     def run(self):
         self.handler.collect()
+        self.handler.dump_to_excel()
 
 
 s = Spider()

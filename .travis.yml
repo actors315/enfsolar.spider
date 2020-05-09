@@ -46,8 +46,7 @@ before_script:
     - echo $AUTO_TRAVIS_RUN
 
 script:
-  #- python company_info.py
-  - python decrypt_email.py
+  - python company_info.py
 
 after_success:
   - git add --all ./doc/*
