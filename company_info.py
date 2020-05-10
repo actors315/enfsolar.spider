@@ -30,7 +30,7 @@ class Handler:
 
         self.companyName2 = '<div class="name">[\s]*(.*)[\s]*?</div>'
         self.tel2 = '<a href=\'tel:(.*?)\'>'
-        self.email2 = '<a onclick="fire_event(\'EmailClickFromCompanyProfile\', [\d]+?)" href="mailto: (.*?)">'
+        self.email2 = '<[\s]*a[\s]*onclick="fire_event(\'EmailClickFromCompanyProfile\', [\d]+?)"[\s]*href[\s]*=[\s]*"mailto: (.*?)"[\s]*>'
         self.site2 = '<a onclick="fire_event(\'WebsiteClickFromCompanyProfile\', [\d]+?)" itemprop="url" href="(.*?)" target="_blank" title=".*">'
         self.region2 = '<div class="word"  style="margin-left: 40px;">[\s]*(.*?)[\s]*<img class="enf-flag" '
 
