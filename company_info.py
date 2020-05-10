@@ -14,7 +14,7 @@ class Handler:
     def __init__(self):
         self.baseURL = u"https://www.enfsolar.com/"
         self.companyName = '<h1 class="blue-title" itemprop="name">[\s]*(.*?)[\s]*?</h1>'
-        self.category = '<a\s*class="enf-icon-type enf-icon-type-(.*?) current enf-tooltip" data-container="body" data-content="(.*?)"'
+        self.category = '<a\s*class="enf-icon-type enf-icon-type-.*? current enf-tooltip" data-container="body" data-content="(.*?)"'
         self.category2 = '<span itemprop="name">[\s]*<span class="glyphicon glyphicon-home"></span>[\s]*(.*?)[\s]*</span>'
         self.tel = '<td itemprop="telephone">[\s]*?<a.*>(.*)</a>[\s]*?</td>'
         self.email = '<td itemprop="email">[\s]*?<a.*?href="mailto: ([^\s]+?)">'
@@ -40,8 +40,6 @@ class Handler:
         try:
             url = self.baseURL + 'company_email/' + code
             headers = {'User-Agent': self.userAgent[3], 'Referer': self.baseURL + uri}
-            print(url)
-            print(headers)
             request = Request(url, headers=headers)
 
             response = urlopen(request, timeout=60)
@@ -58,7 +56,6 @@ class Handler:
     def fetch_content(self, uri):
 
         url = self.baseURL + uri
-
         try:
             headers = {'User-Agent': self.userAgent[random.randint(0, 3)]}
             request = Request(url, headers=headers)
@@ -115,10 +112,13 @@ class Handler:
         collection = re.findall(self.email_click, html)
         if collection:
             row['email_sign'] = collection[0]
+
+            time.sleep(random.randint(180, 540) / 3)
+
             email = self.get_email(row['email_sign'], uri)
             if not email:
                 return False
-            row['email'] = email
+            row['email'] = email.replace('#2019#', '@')
         else:
             collection = re.findall(self.email, html)
             if collection:
@@ -149,30 +149,27 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' order try_index ASC,id ASC LIMIT 10"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' order by try_index ASC,id ASC LIMIT 10"
         arr = db_handler.fetch_data(sql)
-        error_count = 0
 
         for temp in arr:
             info = self.get_company_info(temp[2].lstrip('/'))
 
+            if not info:
+                break
+
+            if "Too many requests" == info['email']:
+                break
+
             sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
                   "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
                   "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
-                  "`tel` = '" + info['tel'] + "',`try_index` = try_index + 1" + \
+                  "`tel` = '" + info['tel'] + "',`try_index` = ifnull(try_index,0) + 1" + \
                   " WHERE id = %d"
             db_handler.execute(sql % temp[0])
-            sleep = random.randint(10, 60) / 120
+            sleep = random.randint(10, 60) / 10
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
             time.sleep(sleep)
-
-            if not info:
-                time.sleep(60)
-                error_count += 1
-                continue
-
-            if error_count == 3:
-                break
 
     def dump_to_excel(self):
 

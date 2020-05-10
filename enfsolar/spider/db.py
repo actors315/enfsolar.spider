@@ -16,7 +16,8 @@ class Factory:
             `tel`  varchar(64) DEFAULT '' ,
             `email`  varchar(128) DEFAULT '' ,
             `email_sign`  varchar(512) DEFAULT '' ,
-            `category`  varchar(255) DEFAULT '' 
+            `category`  varchar(255) DEFAULT '',
+            `try_index` int
             )
         '''
 
