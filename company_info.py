@@ -149,7 +149,7 @@ class Handler:
     def collect(self):
         db_handler = db.Factory()
 
-        sql = "SELECT id,company_id,url FROM company_info WHERE `category` = '' order by try_index ASC,id ASC LIMIT 10"
+        sql = "SELECT id,company_id,url FROM company_info WHERE `email` = '' order by try_index ASC,id ASC LIMIT 10"
         arr = db_handler.fetch_data(sql)
 
         for temp in arr:
@@ -224,6 +224,7 @@ class Spider:
     def run(self):
         self.handler.collect()
         self.handler.dump_to_excel()
+        time.sleep(random.randint(180, 600) / 3)
 
 
 s = Spider()
