@@ -1,11 +1,13 @@
-import re
-import urllib.request
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError, URLError
-from xlsxwriter.workbook import Workbook
 import os
-import time
 import random
+import re
+import sys
+import time
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
+from xlsxwriter.workbook import Workbook
+
 from enfsolar.spider import db
 
 
@@ -169,6 +171,7 @@ class Handler:
             db_handler.execute(sql % temp[0])
             sleep = random.randint(10, 60) / 10
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
+            sys.stdout.flush()
             time.sleep(sleep)
 
     def dump_to_excel(self):
@@ -224,6 +227,7 @@ class Spider:
     def run(self):
         self.handler.collect()
         self.handler.dump_to_excel()
+        print('sleep to wait')
         time.sleep(random.randint(180, 600) / 3)
 
 
