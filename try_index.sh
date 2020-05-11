@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 try_index=$(cat .travis.log)
 
 if try_index < 20 then
