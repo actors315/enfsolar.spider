@@ -5,7 +5,7 @@ python:
 # 项目所在分支
 branches:
   only:
-  - master
+    - master
 
 # 配置环境
 before_install:
@@ -31,19 +31,8 @@ install:
   - pip install -r requirements.txt
 
 before_script:
-    - sed -i 's/skip travis/travis 1st/g' .travis.log
-    - sed -i 's/travis 10st/skip travis/g' .travis.log
-    - sed -i 's/travis 9st/travis 10st/g' .travis.log
-    - sed -i 's/travis 8st/travis 9st/g' .travis.log
-    - sed -i 's/travis 7st/travis 8st/g' .travis.log
-    - sed -i 's/travis 6st/travis 7st/g' .travis.log
-    - sed -i 's/travis 5st/travis 6st/g' .travis.log
-    - sed -i 's/travis 4st/travis 5st/g' .travis.log
-    - sed -i 's/travis 3st/travis 4st/g' .travis.log
-    - sed -i 's/travis 2st/travis 3st/g' .travis.log
-    - sed -i 's/travis 1st/travis 2st/g' .travis.log
-    - export AUTO_TRAVIS_RUN="$(cat .travis.log)"
-    - echo $AUTO_TRAVIS_RUN
+  - ./try_index.sh
+  - echo $AUTO_TRAVIS_RUN
 
 script:
   - python company_info.py
