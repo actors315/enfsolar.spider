@@ -31,6 +31,7 @@ install:
   - pip install -r requirements.txt
 
 before_script:
+  - chmod 755 ./try_index.sh
   - ./try_index.sh
   - echo $AUTO_TRAVIS_RUN
 
