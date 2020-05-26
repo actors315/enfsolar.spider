@@ -35,8 +35,8 @@ before_script:
   - echo $try_index
   - export AUTO_TRAVIS_RUN=$try_index
   - try_index=$(($try_index+1))
-  - if [ $try_index -ge 50 ]; then export AUTO_TRAVIS_RUN="skip travis"; fi
-  - if [ $try_index -ge 50 ]; then try_index=0; fi
+  - if [ $try_index -ge 80 ]; then export AUTO_TRAVIS_RUN="skip travis"; fi
+  - if [ $try_index -ge 80 ]; then try_index=0; fi
   - echo $try_index>.travis.log
   - echo $AUTO_TRAVIS_RUN
 
