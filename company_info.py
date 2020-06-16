@@ -163,12 +163,17 @@ class Handler:
             if "Too many requests" == info['email']:
                 break
 
-            sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info['category'] + "'," + \
-                  "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
-                  "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
-                  "`tel` = '" + info['tel'] + "',`try_index` = ifnull(try_index,0) + 1" + \
-                  " WHERE id = %d"
-            db_handler.execute(sql % temp[0])
+            try:
+                sql = "UPDATE company_info SET `name` = '" + info['name'] + "',`category` = '" + info[ 'category'] + "'," + \
+                      "`region` = '" + info['region'] + "',`site` = '" + info['site'] + "'," + \
+                      "`email` = '" + info['email'] + "'," + "`email_sign` = '" + info['email_sign'] + "'," + \
+                      "`tel` = '" + info['tel'] + "',`try_index` = ifnull(try_index,0) + 1" + \
+                      " WHERE id = %d"
+                db_handler.execute(sql % temp[0])
+            except ValueError as e:
+                print(sql)
+                print(e)
+
             sleep = random.randint(10, 60) / 10
             print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' sleep ' + str(sleep))
             sys.stdout.flush()
